@@ -8,6 +8,7 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
+  activities    Activity[]
 
   @@unique([email])
   @@map("user")
@@ -56,4 +57,18 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model Activity {
+  id         String   @id @map("_id") @default(cuid())
+  name       String
+  intensity  String
+  duration   String
+  emoji      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("activity")
 }
