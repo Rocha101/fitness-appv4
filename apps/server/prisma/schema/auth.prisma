@@ -9,6 +9,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   activities    Activity[]
+  chats         Chat[]
 
   @@unique([email])
   @@map("user")
@@ -71,4 +72,27 @@ model Activity {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("activity")
+}
+
+model Chat {
+  id        String   @id @map("_id") @default(cuid())
+  name      String   @default("Novo Chat")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  Message[]
+
+  @@map("chat")
+}
+
+model Message {
+  id        String   @id @map("_id") @default(cuid())
+  content   Json
+  isUser    Boolean
+  createdAt DateTime @default(now())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@map("message")
 }
