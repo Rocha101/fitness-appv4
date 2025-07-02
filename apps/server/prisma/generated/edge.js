@@ -232,6 +232,7 @@ const config = {
   engineVersion: "9c30299f5a0ea26a96790e13f796dc6094db3173",
   datasourceNames: ["db"],
   activeProvider: "postgresql",
+  postinstall: false,
   inlineDatasources: {
     db: {
       url: {

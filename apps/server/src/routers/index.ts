@@ -248,7 +248,10 @@ export const appRouter = router({
               content:
                 "Você é um assistente especializado em fitness e saúde. Responda sempre em português e de forma útil, motivadora e personalizada. Seja conciso mas informativo.",
             },
-            ...aiMessages,
+            ...aiMessages.map((msg) => ({
+              role: msg.role,
+              content: String(msg.content),
+            })),
           ],
         });
 
