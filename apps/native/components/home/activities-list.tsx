@@ -18,7 +18,7 @@ export const ActivitiesList: React.FC<ActivitiesListProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <View className="bg-white rounded-xl p-8 mb-3 shadow-sm border border-gray-100 items-center">
+      <View className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 items-center">
         <ActivityIndicator size="large" color="#000" />
         <Text className="text-gray-500 text-base text-center mt-4">
           Carregando atividades...
@@ -29,7 +29,7 @@ export const ActivitiesList: React.FC<ActivitiesListProps> = ({
 
   if (activities.length === 0) {
     return (
-      <View className="bg-white rounded-xl p-8 mb-3 shadow-sm border border-gray-100 items-center">
+      <View className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 items-center">
         <Text className="text-gray-500 text-base text-center">
           Nenhuma atividade registrada ainda.{"\n"}
           Comece criando sua primeira atividade!

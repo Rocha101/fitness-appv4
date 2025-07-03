@@ -14,7 +14,7 @@ import { setAndroidNavigationBar } from "@/lib/android-navigation-bar";
 import { authClient } from "@/lib/auth-client";
 import { NAV_THEME } from "@/lib/constants";
 import { useColorScheme } from "@/lib/use-color-scheme";
-import { queryClient } from "@/utils/trpc";
+import { queryClient } from "@/utils/query";
 import React, { useRef } from "react";
 import { Platform } from "react-native";
 
@@ -27,7 +27,7 @@ const DARK_THEME: Theme = {
   colors: NAV_THEME.dark,
 };
 
-export default function RootLayout() {
+function InnerLayout() {
   const hasMounted = useRef(false);
   const { colorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
@@ -52,23 +52,33 @@ export default function RootLayout() {
   }
 
   return (
+    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+      <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Stack screenOptions={{ headerShown: false }}>
+          {session?.user ? (
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          ) : (
+            <Stack.Screen name="auth" options={{ headerShown: false }} />
+          )}
+          <Stack.Screen
+            name="modal"
+            options={{ title: "Modal", presentation: "modal" }}
+          />
+          <Stack.Screen
+            name="history"
+            options={{ title: "Histórico", presentation: "modal" }}
+          />
+        </Stack>
+      </GestureHandlerRootView>
+    </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-        <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <Stack screenOptions={{ headerShown: false }}>
-            {session?.user ? (
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            ) : (
-              <Stack.Screen name="auth" options={{ headerShown: false }} />
-            )}
-            <Stack.Screen
-              name="modal"
-              options={{ title: "Modal", presentation: "modal" }}
-            />
-          </Stack>
-        </GestureHandlerRootView>
-      </ThemeProvider>
+      <InnerLayout />
     </QueryClientProvider>
   );
 }

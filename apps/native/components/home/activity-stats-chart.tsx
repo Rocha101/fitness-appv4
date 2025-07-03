@@ -1,29 +1,35 @@
 import React from "react";
 import { Text, View } from "react-native";
+import { ActivityProgressSvg } from "./activity-progress-svg";
 
 interface ActivityStatsChartProps {
   totalActivities: number;
+  goal?: number;
 }
 
 export const ActivityStatsChart: React.FC<ActivityStatsChartProps> = ({
   totalActivities,
+  goal = 100,
 }) => {
+  // Progress between 0 - 1 (goal 100)
+  const progress = goal ? Math.min(totalActivities / goal, 1) : 0;
+
   return (
-    <View className="bg-white rounded-2xl p-6 mb-8 shadow-sm border border-gray-100">
+    <View className="bg-white rounded-2xl p-6 mb-4 shadow-sm border border-gray-100">
       <Text className="text-lg font-semibold text-gray-900 text-center mb-6">
         Atividades
       </Text>
 
-      {/* Circular Progress */}
-      <View className="items-center mb-4">
-        <View className="w-32 h-32 rounded-full border-8 border-gray-200 items-center justify-center relative">
-          <View className="w-28 h-28 rounded-full border-8 border-gray-800 border-r-transparent border-b-transparent rotate-45 absolute" />
-          <View className="items-center">
-            <Text className="text-4xl font-bold text-gray-900">
-              {totalActivities}
-            </Text>
-            <Text className="text-sm text-gray-600">registrados</Text>
-          </View>
+      <View className="items-center relative mb-4">
+        {/* Semi-circular progress SVG */}
+        <ActivityProgressSvg progress={progress} width={220} strokeWidth={28} />
+
+        {/* Center Text */}
+        <View className="absolute -bottom-10 inset-0 items-center justify-center">
+          <Text className="text-4xl font-bold text-gray-900">
+            {totalActivities}
+          </Text>
+          <Text className="text-sm text-gray-600">registrados</Text>
         </View>
       </View>
     </View>

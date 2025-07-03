@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { trpc } from "@/utils/trpc";
+import { activityAPI, ActivityDTO } from "@/services/activity-api";
 import { getActivityEmoji } from "@/utils/activity-utils";
 
 export interface Activity {
@@ -30,67 +30,72 @@ export const useActivities = (callbacks?: {
   );
 
   // API queries
-  const activityStats = useQuery(trpc.getActivityStats.queryOptions());
-  const activities = useQuery(trpc.getActivities.queryOptions());
+  const activityStats = useQuery({
+    queryKey: ["activityStats"],
+    queryFn: activityAPI.getStats,
+  });
+
+  const activities = useQuery({
+    queryKey: ["activities"],
+    queryFn: activityAPI.list,
+  });
 
   // Invalidate queries helper
   const invalidateQueries = async () => {
-    await queryClient.invalidateQueries(trpc.getActivityStats.queryFilter());
-    await queryClient.invalidateQueries(trpc.getActivities.queryFilter());
+    await queryClient.invalidateQueries({ queryKey: ["activityStats"] });
+    await queryClient.invalidateQueries({ queryKey: ["activities"] });
   };
 
   // Create activity mutation
-  const createActivityMutation = useMutation(
-    trpc.createActivity.mutationOptions({
-      onSuccess: async () => {
-        await invalidateQueries();
-        callbacks?.onSuccess?.(
-          "Atividade registrada com sucesso!",
-          "Sua atividade foi adicionada à lista.",
-        );
-        setIsModalVisible(false);
-      },
-      onError: (error: any) => {
-        callbacks?.onError?.("Erro", error.message);
-      },
-    }),
-  );
+  const createActivityMutation = useMutation({
+    mutationFn: (data: ActivityDTO) => activityAPI.create(data),
+    onSuccess: async () => {
+      await invalidateQueries();
+      callbacks?.onSuccess?.(
+        "Atividade registrada com sucesso!",
+        "Sua atividade foi adicionada à lista.",
+      );
+      setIsModalVisible(false);
+    },
+    onError: (error: any) => {
+      callbacks?.onError?.("Erro", error.message);
+    },
+  });
 
   // Update activity mutation
-  const updateActivityMutation = useMutation(
-    trpc.updateActivity.mutationOptions({
-      onSuccess: async () => {
-        await invalidateQueries();
-        callbacks?.onSuccess?.(
-          "Atividade atualizada com sucesso!",
-          "Suas alterações foram salvas.",
-        );
-        setEditingActivity(undefined);
-        setIsModalVisible(false);
-      },
-      onError: (error: any) => {
-        callbacks?.onError?.("Erro", error.message);
-      },
-    }),
-  );
+  const updateActivityMutation = useMutation({
+    mutationFn: (data: ActivityDTO & { id: string }) =>
+      activityAPI.update(data.id, data),
+    onSuccess: async () => {
+      await invalidateQueries();
+      callbacks?.onSuccess?.(
+        "Atividade atualizada com sucesso!",
+        "Suas alterações foram salvas.",
+      );
+      setEditingActivity(undefined);
+      setIsModalVisible(false);
+    },
+    onError: (error: any) => {
+      callbacks?.onError?.("Erro", error.message);
+    },
+  });
 
   // Delete activity mutation
-  const deleteActivityMutation = useMutation(
-    trpc.deleteActivity.mutationOptions({
-      onSuccess: async () => {
-        await invalidateQueries();
-        callbacks?.onSuccess?.(
-          "Atividade excluída com sucesso!",
-          "A atividade foi removida da sua lista.",
-        );
-        setEditingActivity(undefined);
-        setIsModalVisible(false);
-      },
-      onError: (error: any) => {
-        callbacks?.onError?.("Erro", error.message);
-      },
-    }),
-  );
+  const deleteActivityMutation = useMutation({
+    mutationFn: ({ id }: { id: string }) => activityAPI.remove(id),
+    onSuccess: async () => {
+      await invalidateQueries();
+      callbacks?.onSuccess?.(
+        "Atividade excluída com sucesso!",
+        "A atividade foi removida da sua lista.",
+      );
+      setEditingActivity(undefined);
+      setIsModalVisible(false);
+    },
+    onError: (error: any) => {
+      callbacks?.onError?.("Erro", error.message);
+    },
+  });
 
   // Handlers
   const handleSaveActivity = (activity: ActivityFormData) => {
@@ -142,6 +147,7 @@ export const useActivities = (callbacks?: {
 
   // Computed values
   const recentActivities = activityStats.data?.recentActivities || [];
+  const allActivities = activities.data || [];
   const totalActivities = activityStats.data?.totalActivities || 0;
   const isLoading = activityStats.isLoading || activities.isLoading;
   const isAnyMutationPending =
@@ -156,6 +162,7 @@ export const useActivities = (callbacks?: {
 
     // Data
     recentActivities,
+    allActivities,
     totalActivities,
     isLoading,
     isAnyMutationPending,

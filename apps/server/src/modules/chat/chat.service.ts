@@ -19,9 +19,7 @@ export class ChatService {
         userId,
       },
       include: {
-        messages: {
-          orderBy: { createdAt: "asc" },
-        },
+        messages: true,
       },
     });
   }

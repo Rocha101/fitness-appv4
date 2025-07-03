@@ -1,77 +1,122 @@
-import { Injectable } from "@nestjs/common";
-import { expo } from "@better-auth/expo";
-import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "../prisma/prisma.service";
+import {
+  comparePasswords,
+  createSession,
+  hashPassword,
+  signToken,
+  verifyToken,
+} from "../../lib/auth";
+import { randomUUID } from "crypto";
 
 @Injectable()
 export class AuthService {
-  private auth: ReturnType<typeof betterAuth>;
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+  ) {}
 
-  constructor(private prisma: PrismaService) {
-    this.auth = betterAuth({
-      database: prismaAdapter(this.prisma, {
-        provider: "postgresql",
-      }),
-      baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3001",
-      trustedOrigins: [
-        ...(process.env.CORS_ORIGIN?.split(",").map((origin) =>
-          origin.trim(),
-        ) || []),
-        "my-better-t-app://",
-      ],
-      emailAndPassword: {
-        enabled: true,
+  async register(name: string, email: string, password: string) {
+    const existing = await this.prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      throw new UnauthorizedException("E-mail já está em uso");
+    }
+
+    const passwordHash = await hashPassword(password);
+    const user = await this.prisma.user.create({
+      data: {
+        id: randomUUID(),
+        name,
+        email,
+        emailVerified: false,
+        image: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
-      user: {
-        changeEmail: {
-          enabled: true,
-        },
-        deleteUser: {
-          enabled: true,
-        },
-      },
-      plugins: [expo()],
     });
+
+    await this.prisma.account.create({
+      data: {
+        id: randomUUID(),
+        accountId: "credentials",
+        providerId: "credentials",
+        userId: user.id,
+        password: passwordHash,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+
+    const token = signToken(user.id);
+    await createSession(user.id, token);
+
+    return { token };
   }
 
-  get instance() {
-    return this.auth;
+  async login(email: string, password: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      include: {
+        accounts: true,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException("Credenciais inválidas");
+    }
+
+    const credentialsAccount = user.accounts.find(
+      (acc) => acc.providerId === "credentials" && acc.password,
+    );
+
+    if (!credentialsAccount) {
+      throw new UnauthorizedException("Credenciais inválidas");
+    }
+
+    const valid = await comparePasswords(
+      password,
+      credentialsAccount.password!,
+    );
+    if (!valid) {
+      throw new UnauthorizedException("Credenciais inválidas");
+    }
+
+    const token = signToken(user.id);
+    await createSession(user.id, token);
+
+    return { token };
   }
 
-  async validateSession(token: string) {
-    try {
-      // Remove Bearer prefix if present
-      const sessionToken = token.startsWith("Bearer ")
-        ? token.substring(7)
-        : token;
+  async validateSession(authHeader: string) {
+    const token = authHeader.startsWith("Bearer ")
+      ? authHeader.substring(7)
+      : authHeader;
 
-      // Query the session directly from the database
-      const dbSession = await this.prisma.session.findUnique({
-        where: { token: sessionToken },
-        include: { user: true },
-      });
+    const decoded = verifyToken(token);
+    if (!decoded) return null;
 
-      if (dbSession && dbSession.expiresAt > new Date()) {
-        return {
-          user: {
-            id: dbSession.user.id,
-            email: dbSession.user.email,
-            name: dbSession.user.name,
-          },
-          session: {
-            id: dbSession.id,
-            userId: dbSession.userId,
-            token: dbSession.token,
-            expiresAt: dbSession.expiresAt,
-          },
-        };
-      }
+    const dbSession = await this.prisma.session.findUnique({
+      where: { token },
+      include: { user: true },
+    });
 
-      return null;
-    } catch (error) {
-      console.error("Session validation error:", error);
+    if (!dbSession || dbSession.expiresAt < new Date()) {
       return null;
     }
+
+    return {
+      user: {
+        id: dbSession.user.id,
+        email: dbSession.user.email,
+        name: dbSession.user.name,
+      },
+      session: {
+        id: dbSession.id,
+        userId: dbSession.userId,
+        token: dbSession.token,
+        expiresAt: dbSession.expiresAt,
+      },
+    };
   }
 }

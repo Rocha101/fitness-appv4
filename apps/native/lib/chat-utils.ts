@@ -15,15 +15,15 @@ export interface ChatData {
   updatedAt: Date | string;
 }
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_SERVER_URL;
+const API_BASE_URL = `${process.env.EXPO_PUBLIC_SERVER_URL}/api`;
 
 // Get auth headers for API calls
 export const getAuthHeaders = async () => {
   const session = await authClient.getSession();
   return {
     "Content-Type": "application/json",
-    Authorization: session?.data?.session?.token
-      ? `Bearer ${session.data.session.token}`
+    Authorization: session?.session?.token
+      ? `Bearer ${session.session.token}`
       : "",
   };
 };
@@ -32,7 +32,7 @@ export const getAuthHeaders = async () => {
 export const createChat = async (
   name: string = "Novo Chat",
 ): Promise<ChatData> => {
-  const response = await fetch(`${API_BASE_URL}/trpc/createChat`, {
+  const response = await fetch(`${API_BASE_URL}/chats`, {
     method: "POST",
     headers: await getAuthHeaders(),
     body: JSON.stringify({
@@ -54,7 +54,7 @@ export const loadChatMessages = async (
   messages: ChatMessage[];
   chatName: string;
 }> => {
-  const response = await fetch(`${API_BASE_URL}/api/chat?chatId=${chatId}`, {
+  const response = await fetch(`${API_BASE_URL}/chat?chatId=${chatId}`, {
     headers: await getAuthHeaders(),
   });
 
@@ -74,11 +74,10 @@ export const updateChatName = async (
   chatId: string,
   name: string,
 ): Promise<ChatData> => {
-  const response = await fetch(`${API_BASE_URL}/trpc/updateChatName`, {
-    method: "POST",
+  const response = await fetch(`${API_BASE_URL}/chats/${chatId}`, {
+    method: "PATCH",
     headers: await getAuthHeaders(),
     body: JSON.stringify({
-      id: chatId,
       name,
     }),
   });
@@ -92,7 +91,7 @@ export const updateChatName = async (
 
 // List all chats
 export const listChats = async (): Promise<ChatData[]> => {
-  const response = await fetch(`${API_BASE_URL}/trpc/getChats`, {
+  const response = await fetch(`${API_BASE_URL}/chats`, {
     headers: await getAuthHeaders(),
   });
 
@@ -105,12 +104,8 @@ export const listChats = async (): Promise<ChatData[]> => {
 
 // Delete a chat
 export const deleteChat = async (chatId: string): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/trpc/deleteChat`, {
-    method: "POST",
-    headers: await getAuthHeaders(),
-    body: JSON.stringify({
-      id: chatId,
-    }),
+  const response = await fetch(`${API_BASE_URL}/chats/${chatId}`, {
+    method: "DELETE",
   });
 
   if (!response.ok) {

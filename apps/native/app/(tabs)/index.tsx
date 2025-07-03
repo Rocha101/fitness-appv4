@@ -10,9 +10,13 @@ import {
   ActivitiesList,
   CreateActivityButton,
 } from "@/components/home";
+import { useRouter } from "expo-router";
+import { useGoal } from "@/hooks/use-goal";
+import { GoalModal } from "@/components/goals/goal-modal";
 
 export default function Home() {
   const { showSuccess, showError, AlertComponent } = useCustomAlert();
+  const router = useRouter();
 
   const {
     // State
@@ -41,6 +45,10 @@ export default function Home() {
     onError: showError,
   });
 
+  // Goal hook
+  const { goal, isLoading: isGoalLoading, saveGoal } = useGoal();
+  const [isGoalModalVisible, setGoalModalVisible] = React.useState(false);
+
   return (
     <Container>
       <ScrollView className="flex-1">
@@ -52,13 +60,25 @@ export default function Home() {
             Suas atividades
           </Text>
 
-          <ActivityStatsChart totalActivities={totalActivities} />
+          {/* Chart with dynamic goal */}
+          <ActivityStatsChart
+            totalActivities={totalActivities}
+            goal={goal ?? 100}
+          />
 
           {/* Resumo das atividades */}
-          <Text className="text-lg font-semibold text-gray-900 mb-4">
-            Resumo das atividades
-          </Text>
+          <View className="h-10 flex flex-row items-center justify-between my-4 gap-2">
+            <Text className="text-lg font-semibold text-gray-900">
+              Resumo das atividades
+            </Text>
 
+            <Text
+              className="text-center text-blue-500 text-sm font-semibold"
+              onPress={() => router.push({ pathname: "/history" } as any)}
+            >
+              Ver histórico completo →
+            </Text>
+          </View>
           <ActivitiesList
             activities={recentActivities}
             isLoading={isLoading}
@@ -66,14 +86,16 @@ export default function Home() {
             disabled={isAnyMutationPending}
           />
 
-          <CreateActivityButton
-            onPress={handleCreateNewActivity}
-            disabled={isAnyMutationPending}
-            isCreating={createActivityMutation.isPending}
-            isUpdating={updateActivityMutation.isPending}
-            isDeleting={deleteActivityMutation.isPending}
-            isModalVisible={isModalVisible}
-          />
+          <View>
+            <CreateActivityButton
+              onPress={handleCreateNewActivity}
+              disabled={isAnyMutationPending}
+              isCreating={createActivityMutation.isPending}
+              isUpdating={updateActivityMutation.isPending}
+              isDeleting={deleteActivityMutation.isPending}
+              isModalVisible={isModalVisible}
+            />
+          </View>
         </View>
       </ScrollView>
 
@@ -99,6 +121,17 @@ export default function Home() {
         isCreating={createActivityMutation.isPending}
         isUpdating={updateActivityMutation.isPending}
         isDeleting={deleteActivityMutation.isPending}
+      />
+
+      {/* Goal Modal */}
+      <GoalModal
+        visible={isGoalModalVisible}
+        initialGoal={goal}
+        onSave={(g) => {
+          saveGoal(g);
+          setGoalModalVisible(false);
+        }}
+        onClose={() => setGoalModalVisible(false)}
       />
 
       <AlertComponent />

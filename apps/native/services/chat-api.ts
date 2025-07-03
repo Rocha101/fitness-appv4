@@ -1,15 +1,16 @@
-import { Message, ChatResponse, AuthHeaders } from "@/types/chat";
+import { Message, ChatResponse } from "@/types/chat";
+import { getAuthHeaders } from "@/lib/chat-utils";
 
 export class ChatAPI {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = process.env.EXPO_PUBLIC_SERVER_URL || "";
+    this.baseUrl = `${process.env.EXPO_PUBLIC_SERVER_URL}/api`;
   }
 
-  async loadChatMessages(chatId: string, headers: AuthHeaders) {
-    const response = await fetch(`${this.baseUrl}/api/chat?chatId=${chatId}`, {
-      headers: headers,
+  async loadChatMessages(chatId: string) {
+    const response = await fetch(`${this.baseUrl}/chat?chatId=${chatId}`, {
+      headers: await getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -22,13 +23,12 @@ export class ChatAPI {
   async sendMessage(
     chatId: string,
     messages: Message[],
-    authToken: string,
   ): Promise<ChatResponse> {
-    const response = await fetch(`${this.baseUrl}/api/chat`, {
+    const response = await fetch(`${this.baseUrl}/chat`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         "X-No-Stream": "true",
+        ...(await getAuthHeaders()),
       },
       body: JSON.stringify({
         id: chatId,
@@ -36,7 +36,6 @@ export class ChatAPI {
           role: m.role,
           content: m.content,
         })),
-        authToken: authToken,
       }),
     });
 

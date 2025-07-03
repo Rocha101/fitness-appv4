@@ -1,14 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { ScrollView } from "react-native";
-import { trpc } from "@/utils/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Message, AuthHeaders } from "@/types/chat";
+import { Message } from "@/types/chat";
+import { createChat, updateChatName, loadChatMessages } from "@/lib/chat-utils";
 import { chatAPI } from "@/services/chat-api";
 
 export function useChat() {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [chatName, setChatName] = useState("Novo Chat");
-  const [authToken, setAuthToken] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -17,60 +16,41 @@ export function useChat() {
   const scrollViewRef = useRef<ScrollView>(null);
   const queryClient = useQueryClient();
 
-  // Helper function to get auth headers
-  const getAuthHeaders = async (): Promise<AuthHeaders> => {
-    try {
-      const authClient = await import("@/lib/auth-client");
-      const session = await authClient.authClient.getSession();
-
-      if (session?.data?.session?.token) {
-        return {
-          Authorization: `Bearer ${session.data.session.token}`,
-        };
-      } else {
-        console.warn("No valid session token found");
-        return {
-          Authorization: "",
-        };
-      }
-    } catch (error) {
-      console.error("Error getting auth headers:", error);
-      return {
-        Authorization: "",
-      };
-    }
-  };
-
   // Create new chat mutation
-  const createChatMutation = useMutation(
-    trpc.createChat.mutationOptions({
-      onSuccess: async (chat) => {
-        setCurrentChatId(chat.id);
-        setChatName(chat.name);
+  const createChatMutation = useMutation({
+    mutationFn: ({ name }: { name: string }) => createChat(name),
+    onSuccess: async (chat) => {
+      setCurrentChatId(chat.id);
+      setChatName(chat.name);
 
-        // Load existing messages if any
-        try {
-          const headers = await getAuthHeaders();
-          const data = await chatAPI.loadChatMessages(chat.id, headers);
-          setMessages(data.messages || []);
-          setChatName(data.chatName || chat.name);
-        } catch (error) {
-          console.error("Error loading chat messages:", error);
-        }
-      },
-    }),
-  );
+      // Load existing messages if any
+      try {
+        const data = await loadChatMessages(chat.id);
+        setMessages(
+          (data.messages || []).map((msg) => ({
+            ...msg,
+            createdAt:
+              typeof msg.createdAt === "string"
+                ? msg.createdAt
+                : msg.createdAt.toISOString(),
+          })),
+        );
+        setChatName(data.chatName || chat.name);
+      } catch (error) {
+        console.error("Error loading chat messages:", error);
+      }
+    },
+  });
 
   // Update chat name mutation
-  const updateChatNameMutation = useMutation(
-    trpc.updateChatName.mutationOptions({
-      onSuccess: async (updatedChat) => {
-        setChatName(updatedChat.name);
-        await queryClient.invalidateQueries(trpc.getChats.queryFilter());
-        await queryClient.invalidateQueries(trpc.getChat.queryFilter());
-      },
-    }),
-  );
+  const updateChatNameMutation = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      updateChatName(id, name),
+    onSuccess: async (updatedChat: any) => {
+      setChatName(updatedChat.name);
+      await queryClient.invalidateQueries({ queryKey: ["chats"] });
+    },
+  });
 
   // Submit message function
   const submitMessage = async () => {
@@ -89,11 +69,10 @@ export function useChat() {
     setError(null);
 
     try {
-      const data = await chatAPI.sendMessage(
-        currentChatId,
-        [...messages, userMessage],
-        authToken,
-      );
+      const data = await chatAPI.sendMessage(currentChatId, [
+        ...messages,
+        userMessage,
+      ]);
 
       if (data?.message) {
         setMessages((prev) => [
@@ -124,15 +103,6 @@ export function useChat() {
       });
     }
   };
-
-  // Get auth token on mount
-  useEffect(() => {
-    const updateAuthToken = async () => {
-      const headers = await getAuthHeaders();
-      setAuthToken(headers.Authorization);
-    };
-    updateAuthToken();
-  }, []);
 
   // Create initial chat on component mount
   useEffect(() => {

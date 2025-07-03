@@ -6,6 +6,8 @@ import {
   UseGuards,
   Res,
   HttpStatus,
+  Get,
+  Query,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -16,11 +18,18 @@ import {
 } from "@nestjs/swagger";
 import { Response } from "express";
 import { AiService } from "./ai.service";
+import { ChatService } from "../chat/chat.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
+import { IsArray, ArrayNotEmpty, IsOptional, IsString } from "class-validator";
 
 class ChatRequest {
+  @IsArray()
+  @ArrayNotEmpty()
   messages: any[];
+
+  @IsOptional()
+  @IsString()
   id?: string;
 }
 
@@ -29,7 +38,10 @@ class ChatRequest {
 @UseGuards(JwtAuthGuard)
 @Controller("chat")
 export class AiController {
-  constructor(private readonly aiService: AiService) {}
+  constructor(
+    private readonly aiService: AiService,
+    private readonly chatService: ChatService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: "Enviar mensagem para o assistente de IA" })
@@ -70,5 +82,26 @@ export class AiController {
         error: "Internal server error",
       });
     }
+  }
+
+  @Get()
+  @ApiOperation({ summary: "Carregar mensagens do chat" })
+  @ApiResponse({ status: 200, description: "Mensagens do chat" })
+  async loadChat(@Query("chatId") chatId: string, @CurrentUser() user: any) {
+    if (!chatId) {
+      return {
+        error: "Chat ID is required",
+      };
+    }
+
+    const chat = await this.chatService.findOne(chatId, user.id);
+    const messages =
+      chat.messages ?? (await this.chatService.getMessages(chatId, user.id));
+
+    return {
+      messages,
+      chatId: chat.id,
+      chatName: chat.name,
+    };
   }
 }

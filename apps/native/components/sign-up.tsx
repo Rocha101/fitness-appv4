@@ -1,5 +1,5 @@
 import { authClient } from "@/lib/auth-client";
-import { queryClient } from "@/utils/trpc";
+import { queryClient } from "@/utils/query";
 import {
   Dumbbell01Icon,
   ViewIcon,
