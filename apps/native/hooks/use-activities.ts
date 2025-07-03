@@ -149,6 +149,7 @@ export const useActivities = (callbacks?: {
   const recentActivities = activityStats.data?.recentActivities || [];
   const allActivities = activities.data || [];
   const totalActivities = activityStats.data?.totalActivities || 0;
+  const activitiesLastWeek = activityStats.data?.activitiesLastWeek || 0;
   const isLoading = activityStats.isLoading || activities.isLoading;
   const isAnyMutationPending =
     createActivityMutation.isPending ||
@@ -164,6 +165,7 @@ export const useActivities = (callbacks?: {
     recentActivities,
     allActivities,
     totalActivities,
+    activitiesLastWeek,
     isLoading,
     isAnyMutationPending,
 

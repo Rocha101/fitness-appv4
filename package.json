@@ -19,7 +19,9 @@
     "db:migrate": "turbo -F server db:migrate"
   },
   "dependencies": {
-    "react-native-markdown-display": "^7.0.2"
+    "react-native-circular-progress": "^1.4.1",
+    "react-native-markdown-display": "^7.0.2",
+    "react-native-svg": "^15.12.0"
   },
   "devDependencies": {
     "husky": "^9.1.7",

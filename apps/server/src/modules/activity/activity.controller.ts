@@ -46,7 +46,10 @@ export class ActivityController {
 
   @Get("stats")
   @ApiOperation({ summary: "Obter estatísticas das atividades" })
-  @ApiResponse({ status: 200, description: "Estatísticas das atividades" })
+  @ApiResponse({
+    status: 200,
+    description: "Estatísticas das atividades (total, semana, recentes)",
+  })
   getStats(@CurrentUser() user: any) {
     return this.activityService.getStats(user.id);
   }

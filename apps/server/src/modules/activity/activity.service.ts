@@ -67,8 +67,22 @@ export class ActivityService {
   }
 
   async getStats(userId: string) {
+    // Total registered (all time)
     const totalActivities = await this.prisma.activity.count({
       where: { userId },
+    });
+
+    // Activities in the last 7 days
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    const activitiesLastWeek = await this.prisma.activity.count({
+      where: {
+        userId,
+        createdAt: {
+          gte: oneWeekAgo,
+        },
+      },
     });
 
     const recentActivities = await this.prisma.activity.findMany({
@@ -79,6 +93,7 @@ export class ActivityService {
 
     return {
       totalActivities,
+      activitiesLastWeek,
       recentActivities,
     };
   }

@@ -26,6 +26,7 @@ export default function Home() {
     // Data
     recentActivities,
     totalActivities,
+    activitiesLastWeek,
     isLoading,
     isAnyMutationPending,
 
@@ -62,8 +63,9 @@ export default function Home() {
 
           {/* Chart with dynamic goal */}
           <ActivityStatsChart
-            totalActivities={totalActivities}
+            totalActivities={activitiesLastWeek}
             goal={goal ?? 100}
+            onPress={() => setGoalModalVisible(true)}
           />
 
           {/* Resumo das atividades */}

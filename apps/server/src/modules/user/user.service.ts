@@ -14,6 +14,8 @@ export class UserService {
         name: true,
         createdAt: true,
         updatedAt: true,
+        // @ts-ignore - field added in later Prisma schema update
+        activityGoal: true,
       },
     });
 
@@ -28,7 +30,10 @@ export class UserService {
     return this.findById(id);
   }
 
-  async updateProfile(id: string, data: { name?: string; email?: string }) {
+  async updateProfile(
+    id: string,
+    data: { name?: string; email?: string; activityGoal?: number },
+  ) {
     const user = await this.findById(id);
 
     return this.prisma.user.update({
@@ -38,6 +43,8 @@ export class UserService {
         id: true,
         email: true,
         name: true,
+        // @ts-ignore - field added in later Prisma schema update
+        activityGoal: true,
         createdAt: true,
         updatedAt: true,
       },

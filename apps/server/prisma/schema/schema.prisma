@@ -15,6 +15,7 @@ model User {
   image         String?
   createdAt     DateTime
   updatedAt     DateTime
+  activityGoal  Int?
   sessions      Session[]
   accounts      Account[]
   activities    Activity[]

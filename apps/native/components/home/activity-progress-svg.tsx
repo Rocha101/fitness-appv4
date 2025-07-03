@@ -101,9 +101,7 @@ export const ActivityProgressSvg: React.FC<ActivityProgressSvgProps> = ({
         stroke={progressColor}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
-        strokeDasharray={
-          pathLength ? `${pathLength}, ${pathLength}` : undefined
-        }
+        strokeDasharray={pathLength ? [pathLength, pathLength] : undefined}
         animatedProps={animatedProps}
       />
     </Svg>
