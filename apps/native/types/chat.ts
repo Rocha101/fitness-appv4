@@ -11,6 +11,7 @@ export interface Chat {
   createdAt: string;
   updatedAt: string;
   userId: string;
+  messages?: Message[];
 }
 
 export interface ChatResponse {

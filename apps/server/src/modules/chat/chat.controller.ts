@@ -20,6 +20,7 @@ import { UpdateChatDto } from "./dto/update-chat.dto";
 import { SendMessageDto } from "./dto/send-message.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
+import { User } from "@prisma/client";
 
 @ApiTags("Chat")
 @ApiBearerAuth()
@@ -75,5 +76,15 @@ export class ChatController {
   @ApiResponse({ status: 404, description: "Chat não encontrado" })
   remove(@Param("id") id: string, @CurrentUser() user: any) {
     return this.chatService.remove(id, user.id);
+  }
+
+  @Get()
+  findAllForUser(@CurrentUser() user: User) {
+    return this.chatService.findAllForUser(user.id);
+  }
+
+  @Get(":id")
+  findById(@Param("id") id: string, @CurrentUser() user: User) {
+    return this.chatService.findById(id, user.id);
   }
 }

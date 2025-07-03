@@ -17,6 +17,7 @@ import { useColorScheme } from "@/lib/use-color-scheme";
 import { queryClient } from "@/utils/query";
 import React, { useRef } from "react";
 import { Platform } from "react-native";
+import { SplashScreen } from "@/components/splash-screen";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -48,7 +49,7 @@ function InnerLayout() {
   }, []);
 
   if (!isColorSchemeLoaded || isSessionLoading) {
-    return null;
+    return <SplashScreen />;
   }
 
   return (

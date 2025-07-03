@@ -1,140 +1,176 @@
 import { useState, useRef, useEffect } from "react";
 import { ScrollView } from "react-native";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Message } from "@/types/chat";
-import { createChat, updateChatName, loadChatMessages } from "@/lib/chat-utils";
-import { chatAPI } from "@/services/chat-api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import * as chatService from "@/services/chat-api";
+import { Chat, Message } from "@/types/chat";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+
+const CHAT_ID_STORAGE_KEY = "activeChatId";
 
 export function useChat() {
-  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
-  const [chatName, setChatName] = useState("Novo Chat");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const scrollViewRef = useRef<ScrollView>(null);
   const queryClient = useQueryClient();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const router = useRouter();
+  const { chatId: chatIdFromParams } = useLocalSearchParams<{
+    chatId?: string;
+  }>();
 
-  // Create new chat mutation
-  const createChatMutation = useMutation({
-    mutationFn: ({ name }: { name: string }) => createChat(name),
-    onSuccess: async (chat) => {
-      setCurrentChatId(chat.id);
-      setChatName(chat.name);
+  const [chatId, setChatId] = useState<string | undefined>(undefined);
+  const [input, setInput] = useState("");
 
-      // Load existing messages if any
-      try {
-        const data = await loadChatMessages(chat.id);
-        setMessages(
-          (data.messages || []).map((msg) => ({
-            ...msg,
-            createdAt:
-              typeof msg.createdAt === "string"
-                ? msg.createdAt
-                : msg.createdAt.toISOString(),
-          })),
-        );
-        setChatName(data.chatName || chat.name);
-      } catch (error) {
-        console.error("Error loading chat messages:", error);
+  useEffect(() => {
+    const loadInitialChat = async () => {
+      let activeChatId: string | null | undefined = chatIdFromParams;
+      if (!activeChatId) {
+        activeChatId = await SecureStore.getItemAsync(CHAT_ID_STORAGE_KEY);
       }
-    },
+      if (activeChatId) {
+        setChatId(activeChatId);
+      } else {
+        createEmptyChatMutation.mutate();
+      }
+    };
+    loadInitialChat();
+  }, [chatIdFromParams]);
+
+  const {
+    data: chat,
+    isLoading: isChatLoading,
+    error: chatError,
+  } = useQuery<Chat, Error>({
+    queryKey: ["chat", chatId],
+    queryFn: () => chatService.getChat(chatId!),
+    enabled: !!chatId,
   });
 
-  // Update chat name mutation
+  const messages: Message[] = (chat?.messages ?? []).map((m: any) => {
+    if ("role" in m) return m as Message;
+    return {
+      ...m,
+      role: m.isUser ? "user" : "assistant",
+    };
+  });
+  const chatName = chat?.name ?? "Novo Chat";
+
   const updateChatNameMutation = useMutation({
-    mutationFn: ({ id, name }: { id: string; name: string }) =>
-      updateChatName(id, name),
-    onSuccess: async (updatedChat: any) => {
-      setChatName(updatedChat.name);
-      await queryClient.invalidateQueries({ queryKey: ["chats"] });
+    mutationFn: (newName: string) =>
+      chatService.updateChatName(chatId!, newName),
+    onSuccess: (updatedChat) => {
+      queryClient.setQueryData(["chat", chatId], updatedChat);
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
   });
 
-  // Submit message function
+  const createEmptyChatMutation = useMutation({
+    mutationFn: chatService.createEmptyChat,
+    onSuccess: (newChat) => {
+      queryClient.setQueryData(["chat", newChat.id], newChat);
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
+      router.replace({
+        pathname: "/(tabs)/chat",
+        params: { chatId: newChat.id },
+      });
+      setChatId(newChat.id);
+    },
+  });
+
+  const sendMessageMutation = useMutation({
+    mutationFn: (messages: Message[]) => {
+      return chatService.sendMessage(chatId!, messages);
+    },
+    onSuccess: (assistantMessage) => {
+      queryClient.setQueryData<Chat | undefined>(
+        ["chat", chatId],
+        (oldData) => {
+          if (!oldData) return;
+
+          const currentMessages = oldData.messages ?? [];
+
+          return {
+            ...oldData,
+            messages: [...currentMessages, assistantMessage],
+          };
+        },
+      );
+    },
+  });
+
+  const createChatMutation = useMutation({
+    mutationFn: (content: string) => chatService.createChat({ content }),
+    onSuccess: (newChat) => {
+      queryClient.setQueryData(["chat", newChat.id], newChat);
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
+      router.replace({
+        pathname: "/(tabs)/chat",
+        params: { chatId: newChat.id },
+      });
+      setChatId(newChat.id);
+    },
+  });
+
   const submitMessage = async () => {
-    if (!input.trim() || !currentChatId) return;
+    if (input.trim() === "") return;
+    const content = input;
+    setInput("");
 
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: `temp-user-message-${Date.now()}`,
       role: "user",
-      content: input.trim(),
-      createdAt: new Date().toISOString(),
+      content,
     };
 
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const data = await chatAPI.sendMessage(currentChatId, [
-        ...messages,
-        userMessage,
-      ]);
-
-      if (data?.message) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            ...data.message,
-            createdAt: new Date().toISOString(),
-          },
-        ]);
-      }
-    } catch (err: any) {
-      console.error("Chat error:", err);
-      setError(err);
-    } finally {
-      setIsLoading(false);
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 100);
+    if (chatId) {
+      // Optimistically update the UI
+      queryClient.setQueryData<Chat | undefined>(
+        ["chat", chatId],
+        (oldData) => {
+          if (!oldData) return;
+          return {
+            ...oldData,
+            messages: [...(oldData.messages ?? []), userMessage],
+          };
+        },
+      );
+      sendMessageMutation.mutate([...messages, userMessage]);
+    } else {
+      createChatMutation.mutate(content);
     }
   };
 
-  // Handle chat name update
-  const handleUpdateChatName = (name: string) => {
-    if (currentChatId) {
-      updateChatNameMutation.mutate({
-        id: currentChatId,
-        name: name,
-      });
+  const handleUpdateChatName = (newName: string) => {
+    if (chatId) {
+      updateChatNameMutation.mutate(newName);
     }
   };
 
-  // Create initial chat on component mount
   useEffect(() => {
-    if (!currentChatId && !createChatMutation.isPending) {
-      createChatMutation.mutate({ name: "Novo Chat" });
-    }
-  }, [currentChatId]);
-
-  // Auto-scroll when new messages arrive
-  useEffect(() => {
-    if (messages.length > 0) {
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 100);
+    if (scrollViewRef.current) {
+      setTimeout(
+        () => scrollViewRef.current?.scrollToEnd({ animated: true }),
+        100,
+      );
     }
   }, [messages.length]);
 
   return {
-    // State
-    currentChatId,
     chatName,
     messages,
     input,
-    isLoading,
-    error,
+    isLoading:
+      isChatLoading ||
+      sendMessageMutation.isPending ||
+      createChatMutation.isPending ||
+      createEmptyChatMutation.isPending,
+    error:
+      chatError ||
+      sendMessageMutation.error ||
+      createChatMutation.error ||
+      createEmptyChatMutation.error,
     scrollViewRef,
-
-    // Mutations
     createChatMutation,
+    createEmptyChatMutation,
     updateChatNameMutation,
-
-    // Actions
     setInput,
     submitMessage,
     handleUpdateChatName,

@@ -38,12 +38,20 @@ export const activityAPI = {
   },
 
   async update(id: string, data: ActivityDTO) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: _, ...updateData } = data;
+
     const res = await fetch(`${BASE_URL}/activities/${id}`, {
       method: "PATCH",
       headers: await getAuthHeaders(),
-      body: JSON.stringify(data),
+      body: JSON.stringify(updateData),
     });
-    if (!res.ok) throw new Error("Erro ao atualizar atividade");
+    if (!res.ok) {
+      const errorBody = await res.json();
+      throw new Error(
+        errorBody.message?.join?.(", ") || "Erro ao atualizar atividade",
+      );
+    }
     return res.json();
   },
 

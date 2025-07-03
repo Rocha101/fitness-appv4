@@ -8,11 +8,13 @@ import {
 } from "react-native";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import {
-  AiChat02FreeIcons,
+  ArrowLeft02Icon,
   Edit02FreeIcons,
   CheckmarkCircle02Icon,
   Cancel01Icon,
+  Menu02Icon,
 } from "@hugeicons/core-free-icons";
+import { useRouter } from "expo-router";
 
 interface ChatHeaderProps {
   chatName: string;
@@ -25,6 +27,7 @@ export function ChatHeader({
   onUpdateName,
   isUpdating = false,
 }: ChatHeaderProps) {
+  const router = useRouter();
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempChatName, setTempChatName] = useState("");
 
@@ -48,78 +51,87 @@ export function ChatHeader({
   };
 
   return (
-    <View className="px-6 py-4 border-b border-gray-100">
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center flex-1">
-          <View className="w-10 h-10 border-2 border-gray-300 rounded-xl items-center justify-center mr-3">
-            <HugeiconsIcon
-              icon={AiChat02FreeIcons}
-              size={20}
-              color="#666"
-              strokeWidth={1.5}
-            />
-          </View>
-
-          {isEditingName ? (
-            <View className="flex-1 flex-row items-center">
-              <TextInput
-                className="flex-1 text-xl font-bold text-gray-900 border-b border-gray-300 pb-1"
-                value={tempChatName}
-                onChangeText={setTempChatName}
-                onSubmitEditing={saveChatName}
-                autoFocus
-                maxLength={50}
-                returnKeyType="done"
+    <View className="px-4 py-4 border-b border-gray-100">
+      <View className="flex-row items-center">
+        {isEditingName ? (
+          <>
+            {/* Cancel button */}
+            <TouchableOpacity
+              onPress={cancelEditingName}
+              className="w-10 h-10 items-center justify-center"
+            >
+              <HugeiconsIcon
+                icon={Cancel01Icon}
+                size={20}
+                color="#ef4444"
+                strokeWidth={1.5}
               />
-              <TouchableOpacity
-                onPress={saveChatName}
-                className="w-8 h-8 items-center justify-center ml-2"
-                disabled={isUpdating}
-              >
-                {isUpdating ? (
-                  <ActivityIndicator size="small" color="#22c55e" />
-                ) : (
-                  <HugeiconsIcon
-                    icon={CheckmarkCircle02Icon}
-                    size={18}
-                    color="#22c55e"
-                    strokeWidth={1.5}
-                  />
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={cancelEditingName}
-                className="w-8 h-8 items-center justify-center ml-1"
-              >
+            </TouchableOpacity>
+
+            {/* Chat name input */}
+            <TextInput
+              className="flex-1 text-xl leading-tight font-bold text-gray-900 text-center mx-2 bg-gray-100 rounded-lg px-3 py-2"
+              value={tempChatName}
+              onChangeText={setTempChatName}
+              onSubmitEditing={saveChatName}
+              autoFocus
+              maxLength={50}
+              returnKeyType="done"
+            />
+
+            {/* Save button */}
+            <TouchableOpacity
+              onPress={saveChatName}
+              className="w-10 h-10 items-center justify-center"
+              disabled={isUpdating}
+            >
+              {isUpdating ? (
+                <ActivityIndicator size="small" color="#22c55e" />
+              ) : (
                 <HugeiconsIcon
-                  icon={Cancel01Icon}
-                  size={18}
-                  color="#ef4444"
+                  icon={CheckmarkCircle02Icon}
+                  size={20}
+                  color="#22c55e"
                   strokeWidth={1.5}
                 />
-              </TouchableOpacity>
-            </View>
-          ) : (
+              )}
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            {/* Menu button */}
+            <TouchableOpacity
+              onPress={() => router.push("/chat-history")}
+              className="w-10 h-10 items-center justify-center"
+            >
+              <HugeiconsIcon
+                icon={Menu02Icon}
+                size={20}
+                color="#666"
+                strokeWidth={1.5}
+              />
+            </TouchableOpacity>
+
+            {/* Chat name */}
             <TouchableOpacity onPress={startEditingName} className="flex-1">
-              <Text className="text-xl font-bold text-gray-900">
+              <Text className="text-xl font-bold text-gray-900 text-center">
                 {chatName}
               </Text>
             </TouchableOpacity>
-          )}
-        </View>
 
-        {!isEditingName && (
-          <TouchableOpacity
-            onPress={startEditingName}
-            className="w-10 h-10 items-center justify-center"
-          >
-            <HugeiconsIcon
-              icon={Edit02FreeIcons}
-              size={20}
-              color="#666"
-              strokeWidth={1.5}
-            />
-          </TouchableOpacity>
+            {/* Edit button */}
+            <TouchableOpacity
+              onPress={startEditingName}
+              className="w-10 h-10 items-center justify-center"
+            >
+              <HugeiconsIcon
+                icon={Edit02FreeIcons}
+                size={20}
+                color="#666"
+                strokeWidth={1.5}
+              />
+            </TouchableOpacity>
+          </>
         )}
       </View>
     </View>

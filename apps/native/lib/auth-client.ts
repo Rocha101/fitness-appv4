@@ -148,6 +148,7 @@ async function signOut() {
 const notImplemented = () => Promise.reject(new Error("Not implemented"));
 
 export const authClient = {
+  getToken,
   signIn: { email: signInEmail },
   signUp: { email: signUpEmail },
   signOut,

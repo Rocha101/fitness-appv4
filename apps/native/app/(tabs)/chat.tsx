@@ -17,14 +17,19 @@ export default function Chat() {
     error,
     scrollViewRef,
     createChatMutation,
+    createEmptyChatMutation,
     updateChatNameMutation,
     setInput,
     submitMessage,
     handleUpdateChatName,
   } = useChat();
 
-  if (createChatMutation.isPending) {
-    return <ChatLoading message="Criando chat..." />;
+  if (isLoading) {
+    let message = "Carregando chat...";
+    if (createChatMutation.isPending || createEmptyChatMutation.isPending) {
+      message = "Criando novo chat...";
+    }
+    return <ChatLoading message={message} />;
   }
 
   return (

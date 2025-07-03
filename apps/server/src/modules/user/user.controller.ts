@@ -15,12 +15,7 @@ import {
 import { UserService } from "./user.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
-
-class UpdateProfileDto {
-  name?: string;
-  email?: string;
-  activityGoal?: number;
-}
+import { UpdateProfileDto } from "./dto/update-profile.dto";
 
 @ApiTags("User")
 @ApiBearerAuth()

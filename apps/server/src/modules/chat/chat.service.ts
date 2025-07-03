@@ -112,4 +112,29 @@ export class ChatService {
       orderBy: { createdAt: "asc" },
     });
   }
+
+  async findAllForUser(userId: string) {
+    return this.prisma.chat.findMany({
+      where: { userId },
+      orderBy: { updatedAt: "desc" },
+    });
+  }
+
+  async findById(id: string, userId: string) {
+    const chat = await this.prisma.chat.findUnique({
+      where: { id, userId },
+    });
+
+    if (!chat) {
+      throw new NotFoundException("Chat não encontrado");
+    }
+
+    if (chat.userId !== userId) {
+      throw new ForbiddenException(
+        "Você não tem permissão para acessar este chat",
+      );
+    }
+
+    return chat;
+  }
 }

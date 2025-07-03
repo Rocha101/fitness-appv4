@@ -1,17 +1,26 @@
-import { useColorScheme } from "@/lib/use-color-scheme";
 import {
   AiChat02FreeIcons,
-  ArrowLeft01Icon,
   HomeIcon,
   Settings02Icon,
-  WorkHistoryIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react-native";
-import { router, Tabs } from "expo-router";
-import { TouchableOpacity } from "react-native";
+import { Tabs, Redirect } from "expo-router";
+import { authClient } from "@/lib/auth-client";
+import { SplashScreen } from "@/components/splash-screen";
 
 export default function TabLayout() {
-  const { isDarkColorScheme } = useColorScheme();
+  const { data: session, isPending: isSessionLoading } =
+    authClient.useSession();
+
+  // Wait until the session query finishes before deciding what to render
+  if (isSessionLoading) {
+    return <SplashScreen />;
+  }
+
+  // If no authenticated user, redirect to the auth flow
+  if (!session?.user) {
+    return <Redirect href="/auth" />;
+  }
 
   return (
     <Tabs

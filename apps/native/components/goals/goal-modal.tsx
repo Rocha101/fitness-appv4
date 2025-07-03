@@ -58,11 +58,11 @@ export const GoalModal: React.FC<GoalModalProps> = ({
             className="bg-white rounded-2xl w-full p-6"
           >
             <Text className="text-xl font-bold text-gray-900 mb-4">
-              Definir meta de atividades
+              Definir meta de atividades semanal
             </Text>
 
             <TextInput
-              className="border border-gray-300 rounded-lg p-4 text-lg"
+              className="border border-gray-300 rounded-lg p-4 text-lg leading-tight"
               placeholder="Quantidade de atividades (ex: 50)"
               keyboardType="number-pad"
               autoFocus

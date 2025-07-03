@@ -9,7 +9,7 @@ export interface ChatMessageProps {
 }
 
 const markdownStyles = {
-  body: { color: "#374151", fontSize: 16, lineHeight: 20 },
+  body: { color: "#374151", fontSize: 16, lineHeight: 20, flexShrink: 1 },
   strong: { fontWeight: "700" as const },
   em: { fontStyle: "italic" as const },
   code_inline: {
@@ -34,10 +34,14 @@ export const ChatMessage = memo(({ role, content }: ChatMessageProps) => {
   return (
     <View className={`mb-4 ${isUser ? "items-end" : "items-start"}`}>
       <View
-        className={`max-w-[80%] px-4 py-3 rounded-2xl ${isUser ? "bg-black rounded-br-md" : "bg-gray-100 rounded-bl-md"}`}
+        className={`max-w-[80%] flex-row bg-white px-4 py-3 shadow-sm border border-gray-200 rounded-2xl ${
+          isUser ? "rounded-br-md" : "rounded-bl-md"
+        }`}
       >
         {isUser ? (
-          <Text className="text-base leading-5 text-white">{content}</Text>
+          <Text className="text-base leading-5 text-gray-900 flex-shrink">
+            {content}
+          </Text>
         ) : (
           <Markdown style={markdownStyles}>{content}</Markdown>
         )}

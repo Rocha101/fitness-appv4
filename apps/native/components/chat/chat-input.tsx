@@ -5,7 +5,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { HugeiconsIcon } from "@hugeicons/react-native";
-import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
+import { SentIcon } from "@hugeicons/core-free-icons";
 
 interface ChatInputProps {
   value: string;
@@ -27,12 +27,12 @@ export function ChatInput({
   const canSubmit = value.trim() !== "" && !isLoading;
 
   return (
-    <View className="px-6 py-4 border-t border-gray-100">
-      <View className="flex-row items-center space-x-3">
+    <View className="px-4 py-3 border-t border-gray-100 bg-white">
+      <View className="flex-row items-center bg-gray-100 rounded-lg px-4 py-1">
         <TextInput
-          className="flex-1 bg-gray-100 rounded-full px-4 py-3 text-base text-gray-900"
+          className="flex-1 h-10 text-base text-gray-900 rounded-xs"
           placeholder={placeholder}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor="#6b7280"
           value={value}
           onChangeText={onChangeText}
           multiline
@@ -40,21 +40,20 @@ export function ChatInput({
           onSubmitEditing={onSubmit}
           returnKeyType="send"
           editable={!isLoading}
+          style={{ backgroundColor: "transparent" }}
         />
         <TouchableOpacity
           onPress={onSubmit}
-          className={`w-12 h-12 rounded-full items-center justify-center ${
-            canSubmit ? "bg-black" : "bg-gray-300"
-          }`}
+          className="w-10 h-10 items-center justify-center"
           disabled={!canSubmit}
         >
           {isLoading ? (
-            <ActivityIndicator size="small" color="white" />
+            <ActivityIndicator size="small" color="#666" />
           ) : (
             <HugeiconsIcon
-              icon={ArrowRight02Icon}
-              size={20}
-              color="white"
+              icon={SentIcon}
+              size={24}
+              color={canSubmit ? "#000" : "#9CA3AF"}
               strokeWidth={2}
             />
           )}

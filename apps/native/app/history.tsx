@@ -5,8 +5,22 @@ import { useCustomAlert } from "@/components/custom-alert";
 import { useActivities } from "@/hooks/use-activities";
 import { ActivitiesList } from "@/components/home";
 import { ActivityModal } from "@/components/activity-modal";
+import { Redirect } from "expo-router";
+import { authClient } from "@/lib/auth-client";
+import { SplashScreen } from "@/components/splash-screen";
 
 export default function History() {
+  const { data: session, isPending: isSessionLoading } =
+    authClient.useSession();
+
+  if (isSessionLoading) {
+    return <SplashScreen />;
+  }
+
+  if (!session?.user) {
+    return <Redirect href="/auth" />;
+  }
+
   const { showError, showSuccess, AlertComponent } = useCustomAlert();
 
   const {
