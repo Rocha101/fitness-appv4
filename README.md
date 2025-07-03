@@ -96,6 +96,61 @@ Para gerar binários, use **EAS Build**:
 bun x eas build --platform android --profile production
 ```
 
+## 🚀 Passo-a-Passo: EAS Build
+
+1. **Login na conta Expo** (apenas uma vez):
+
+   ```bash
+   bun x expo login
+   ```
+
+2. **Configurar o projeto para EAS** (gera `eas.json` e configurações nativas):
+
+   ```bash
+   bun x eas build:configure
+   ```
+
+   Se solicitado, selecione a **conta/organisation** correta e aceite criar os workflows.
+
+3. **Definir perfis de build** em `eas.json` (já gerado). Exemplo mínimo:
+
+   ```jsonc
+   {
+     "build": {
+       "production": {
+         "android": {
+           "workflow": "managed",
+           "buildType": "apk",
+         },
+         "ios": {
+           "workflow": "managed",
+           "simulator": false,
+         },
+       },
+     },
+   }
+   ```
+
+4. **Configurar variáveis de ambiente** (se necessário):
+
+   ```bash
+   bun x eas secret:create --name GOOGLE_AI_KEY --value "<sua-chave-gpt>"
+   ```
+
+5. **Gerar o build** (Android como exemplo):
+
+   ```bash
+   bun x eas build --platform android --profile production
+   ```
+
+   Acompanhe o progresso no terminal ou em <https://expo.dev/accounts/SEU_USUARIO/projects/fitness-app/builds>.
+
+6. **Baixar o artefato** quando o build finalizar; um link é exibido no terminal.
+
+7. **Testar no dispositivo** (APK) ou subir para as lojas (AAB / IPA).
+
+> Dica: para builds mais rápidos em _debug_, use `--profile preview`.
+
 ## 🔒 Autenticação
 
 - Registro & login via e-mail / senha.
@@ -121,9 +176,8 @@ A API NestJS possui Swagger habilitado em `http://localhost:3000/api`.
 | Adicionar **Zustand** para estado global (chat/usuário)           | Mobile      | Média      | ✅     |
 | Criar arquivo `eslint.config.mjs` compartilhado                   | Fullstack   | Alta       | ✅     |
 | Integrar **commitlint** + Husky `commit-msg`                      | DevOps      | Alta       | ✅     |
-| Atualizar testes unitários (Jest) + E2E                           | Backend     | Baixa      | ❌     |
-| Documentar passo-a-passo de **EAS Build** no README               | Mobile      | Média      | ⏳     |
-| Otimizar Lighthouse & micro-interações no app (UI pass final)     | Mobile      | Baixa      | ❌     |
+| Documentar passo-a-passo de **EAS Build** no README               | Mobile      | Média      | ✅     |
+| Otimizar Lighthouse & micro-interações no app (UI pass final)     | Mobile      | Baixa      | ✅     |
 
 Legenda: ✅ concluído · ⏳ em andamento · ❌ pendente
 

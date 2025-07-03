@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -19,19 +19,23 @@ import {
   PlusSignIcon,
   Delete01FreeIcons,
 } from "@hugeicons/core-free-icons";
+import { PressableScale } from "@/components/pressable-scale";
 
 function ChatHistoryItem({
   item,
   onPress,
   onDelete,
+  isDeleting = false,
 }: {
   item: Chat;
   onPress: () => void;
   onDelete: () => void;
+  isDeleting?: boolean;
 }) {
   return (
-    <TouchableOpacity
+    <PressableScale
       onPress={onPress}
+      disabled={isDeleting}
       className="flex-row items-center p-4 mb-2 bg-white rounded-lg border border-gray-200 shadow-sm"
     >
       <HugeiconsIcon icon={AiChat02FreeIcons} size={24} color="#333" />
@@ -43,16 +47,24 @@ function ChatHistoryItem({
           Última mensagem: {new Date(item.updatedAt).toLocaleDateString()}
         </Text>
       </View>
-      <TouchableOpacity onPress={onDelete} className="p-2 ml-2">
-        <HugeiconsIcon icon={Delete01FreeIcons} size={22} color="#ef4444" />
-      </TouchableOpacity>
-    </TouchableOpacity>
+      {isDeleting ? (
+        <View className="ml-2 p-2">
+          <ActivityIndicator size="small" color="#ef4444" />
+        </View>
+      ) : (
+        <TouchableOpacity onPress={onDelete} className="p-2 ml-2">
+          <HugeiconsIcon icon={Delete01FreeIcons} size={22} color="#ef4444" />
+        </TouchableOpacity>
+      )}
+    </PressableScale>
   );
 }
 
 export default function ChatHistoryScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const {
     data: chats,
@@ -66,7 +78,11 @@ export default function ChatHistoryScreen() {
 
   const deleteChatMutation = useMutation({
     mutationFn: deleteChat,
-    onSuccess: () => {
+    onMutate: (id: string) => {
+      setDeletingId(id);
+    },
+    onSettled: () => {
+      setDeletingId(null);
       queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
     onError: (err: Error) => {
@@ -163,6 +179,7 @@ export default function ChatHistoryScreen() {
             item={item}
             onPress={() => handleSelectChat(item.id)}
             onDelete={() => handleDeleteChat(item.id)}
+            isDeleting={deletingId === item.id}
           />
         )}
         contentContainerStyle={{ padding: 16 }}

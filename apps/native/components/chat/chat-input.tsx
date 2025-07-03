@@ -1,11 +1,7 @@
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
+import { View, TextInput, ActivityIndicator } from "react-native";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { SentIcon } from "@hugeicons/core-free-icons";
+import { PressableScale } from "@/components/pressable-scale";
 
 interface ChatInputProps {
   value: string;
@@ -42,7 +38,7 @@ export function ChatInput({
           editable={!isLoading}
           style={{ backgroundColor: "transparent" }}
         />
-        <TouchableOpacity
+        <PressableScale
           onPress={onSubmit}
           className="w-10 h-10 items-center justify-center"
           disabled={!canSubmit}
@@ -57,7 +53,7 @@ export function ChatInput({
               strokeWidth={2}
             />
           )}
-        </TouchableOpacity>
+        </PressableScale>
       </View>
     </View>
   );

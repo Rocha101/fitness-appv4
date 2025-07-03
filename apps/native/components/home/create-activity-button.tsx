@@ -1,5 +1,6 @@
 import React from "react";
-import { ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import { ActivityIndicator, Text } from "react-native";
+import { PressableScale } from "@/components/pressable-scale";
 
 interface CreateActivityButtonProps {
   onPress: () => void;
@@ -28,7 +29,7 @@ export const CreateActivityButton: React.FC<CreateActivityButtonProps> = ({
   const shouldShowLoading = disabled && !isModalVisible;
 
   return (
-    <TouchableOpacity
+    <PressableScale
       onPress={onPress}
       disabled={disabled}
       className={`rounded-xl p-4 mt-6 mb-8 flex-row items-center justify-center ${
@@ -43,6 +44,6 @@ export const CreateActivityButton: React.FC<CreateActivityButtonProps> = ({
       >
         {getButtonText()}
       </Text>
-    </TouchableOpacity>
+    </PressableScale>
   );
 };

@@ -1,9 +1,10 @@
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, View } from "react-native";
 import { HugeiconsIcon } from "@hugeicons/react-native";
 import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
 import { getActivityEmoji } from "@/utils/activity-utils";
 import { Activity } from "@/hooks/use-activities";
+import { PressableScale } from "@/components/pressable-scale";
 
 interface ActivityCardProps {
   activity: Activity;
@@ -17,7 +18,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
   disabled = false,
 }) => {
   return (
-    <TouchableOpacity
+    <PressableScale
       onPress={() => onPress(activity)}
       disabled={disabled}
       className={`bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100 flex-row items-center justify-between ${
@@ -48,6 +49,6 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
         color={disabled ? "#ccc" : "#666"}
         strokeWidth={1.5}
       />
-    </TouchableOpacity>
+    </PressableScale>
   );
 };
