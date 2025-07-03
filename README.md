@@ -2,18 +2,6 @@
 
 Aplicativo mobile completo para registro e acompanhamento de atividades físicas, com backend NestJS, autenticação via JWT e interface de chatbot com IA.
 
-## 🌐 Repositório
-
-GitHub: <https://github.com/SEU_USUARIO/fitness-app>
-
-## 📲 Preview – Expo Go / APK / IPA
-
-| Plataforma        | Link / QR-Code                               | Observações                                                        |
-| ----------------- | -------------------------------------------- | ------------------------------------------------------------------ |
-| **Expo Go (dev)** | <https://expo.dev/@SEU_USUARIO/fitness-app>  | Escaneie com o **Expo Go** para abrir a versão de desenvolvimento. |
-| **APK (Android)** | <https://expo.dev/artifacts/eas/SEU_APK.apk> | Build "production" gerado via **EAS Build**.                       |
-| **IPA (iOS)**     | <https://expo.dev/artifacts/eas/SEU_IPA.ipa> | TestFlight ou arquivo IPA (disponível após build).                 |
-
 ## ✨ Tecnologias Principais
 
 | Camada    | Tecnologias                                                                            |
