@@ -12,12 +12,17 @@ export class ActivityService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, createActivityDto: CreateActivityDto) {
-    return this.prisma.activity.create({
-      data: {
-        ...createActivityDto,
-        userId,
-      },
-    });
+    const { name, intensity, duration, emoji } = createActivityDto;
+
+    const data = {
+      name,
+      intensity,
+      duration,
+      emoji,
+      user: { connect: { id: userId } },
+    };
+
+    return this.prisma.activity.create({ data });
   }
 
   async findAll(userId: string) {

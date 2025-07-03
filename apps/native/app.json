@@ -1,40 +1,46 @@
 {
-	"expo": {
-		"name": "fitness-app",
-		"slug": "fitness-app",
-		"version": "1.0.0",
-		"scheme": "fitness-app",
-		"web": {
-			"bundler": "metro",
-			"output": "static",
-			"favicon": "./assets/favicon.png"
-		},
-		"plugins": ["expo-router", "expo-secure-store", "expo-web-browser"],
-		"experiments": {
-			"typedRoutes": true,
-			"tsconfigPaths": true
-		},
-		"newArchEnabled": true,
-		"orientation": "portrait",
-		"icon": "./assets/icon.png",
-		"userInterfaceStyle": "light",
-		"splash": {
-			"image": "./assets/splash.png",
-			"resizeMode": "contain",
-			"backgroundColor": "#ffffff"
-		},
-		"assetBundlePatterns": ["**/*"],
-		"ios": {
-			"supportsTablet": true,
-			"bundleIdentifier": "com.rocha101.fitnessapp"
-		},
-		"android": {
-			"adaptiveIcon": {
-				"foregroundImage": "./assets/adaptive-icon.png",
-				"backgroundColor": "#ffffff"
-			},
-			"package": "com.rocha101.fitnessapp",
-			"edgeToEdgeEnabled": true
-		}
-	}
+  "expo": {
+    "name": "fitness-app",
+    "slug": "fitness-app",
+    "version": "1.0.0",
+    "scheme": "fitness-app",
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-router", "expo-secure-store", "expo-web-browser"],
+    "experiments": {
+      "typedRoutes": true,
+      "tsconfigPaths": true
+    },
+    "newArchEnabled": true,
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rocha101.fitnessapp"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.rocha101.fitnessapp",
+      "edgeToEdgeEnabled": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "cd0a533f-8864-4cbf-b52d-ef282b30a070"
+      }
+    }
+  }
 }

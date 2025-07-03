@@ -2,6 +2,18 @@
 
 Aplicativo mobile completo para registro e acompanhamento de atividades físicas, com backend NestJS, autenticação via JWT e interface de chatbot com IA.
 
+## 🌐 Repositório
+
+GitHub: <https://github.com/SEU_USUARIO/fitness-app>
+
+## 📲 Preview – Expo Go / APK / IPA
+
+| Plataforma        | Link / QR-Code                               | Observações                                                        |
+| ----------------- | -------------------------------------------- | ------------------------------------------------------------------ |
+| **Expo Go (dev)** | <https://expo.dev/@SEU_USUARIO/fitness-app>  | Escaneie com o **Expo Go** para abrir a versão de desenvolvimento. |
+| **APK (Android)** | <https://expo.dev/artifacts/eas/SEU_APK.apk> | Build "production" gerado via **EAS Build**.                       |
+| **IPA (iOS)**     | <https://expo.dev/artifacts/eas/SEU_IPA.ipa> | TestFlight ou arquivo IPA (disponível após build).                 |
+
 ## ✨ Tecnologias Principais
 
 | Camada    | Tecnologias                                                                            |
@@ -165,7 +177,21 @@ Endpoint `/chat` responde com IA Gemini.
 
 A API NestJS possui Swagger habilitado em `http://localhost:3000/api`.
 
----
+## 🛠️ Decisões Técnicas
+
+| Tema                       | Escolha                                               | Justificativa                                                       |
+| -------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------- |
+| **Monorepo**               | **Turborepo** + workspaces                            | Cache compartilhado e pipelines paralelos entre frontend e backend. |
+| **Gerenciador de pacotes** | **Bun**                                               | Scripts nativos (`bun run`, `bun x`) e desempenho superior.         |
+| **Mobile**                 | **Expo** + **React Native** + **Nativewind/Tailwind** | Iteração rápida; estilo declarativo consistente.                    |
+| **Backend**                | **NestJS** + **Prisma**                               | Arquitetura modular e tipagem forte end-to-end.                     |
+| **Validação**              | **Zod**                                               | Validação funcional reutilizável em ambos os lados.                 |
+| **State Management**       | **Zustand**                                           | API simples e leve para React Native; evita boilerplate.            |
+| **Auth**                   | JWT access + refresh-token rotation                   | Tokens no **SecureStore**; fluxo seguro.                            |
+| **Chat IA**                | Google Gemini (`@ai-sdk/google`)                      | Integração direta e custo/benefício.                                |
+| **CI/CD Mobile**           | **EAS Build**                                         | Builds nativos em nuvem integrados ao Expo.                         |
+| **Qualidade**              | ESLint & Prettier + Husky + Commitlint                | Código consistente e commits padronizados.                          |
+| **UI/UX**                  | Huge-icons, micro-interações, otimização Lighthouse   | Experiência moderna e performática.                                 |
 
 ## 🛣️ Roadmap (Planejamento)
 
