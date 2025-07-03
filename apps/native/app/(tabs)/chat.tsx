@@ -13,7 +13,8 @@ export default function Chat() {
     chatName,
     messages,
     input,
-    isLoading,
+    initialLoading,
+    isSending,
     error,
     scrollViewRef,
     createChatMutation,
@@ -24,7 +25,7 @@ export default function Chat() {
     handleUpdateChatName,
   } = useChat();
 
-  if (isLoading) {
+  if (initialLoading) {
     let message = "Carregando chat...";
     if (createChatMutation.isPending || createEmptyChatMutation.isPending) {
       message = "Criando novo chat...";
@@ -47,7 +48,7 @@ export default function Chat() {
         <ChatMessages
           ref={scrollViewRef}
           messages={messages}
-          isLoading={isLoading}
+          isLoading={isSending}
           error={error}
         />
 
@@ -55,7 +56,7 @@ export default function Chat() {
           value={input}
           onChangeText={setInput}
           onSubmit={submitMessage}
-          isLoading={isLoading}
+          isLoading={isSending}
         />
       </KeyboardAvoidingView>
     </Container>

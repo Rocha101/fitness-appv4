@@ -17,6 +17,9 @@ import {
 import { ActivityService } from "./activity.service";
 import { CreateActivityDto } from "./dto/create-activity.dto";
 import { UpdateActivityDto } from "./dto/update-activity.dto";
+import { createActivitySchema } from "./dto/create-activity.dto";
+import { updateActivitySchema } from "./dto/update-activity.dto";
+import { ZodValidationPipe } from "@/lib/zod-validation.pipe";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 
@@ -31,7 +34,8 @@ export class ActivityController {
   @ApiOperation({ summary: "Criar nova atividade" })
   @ApiResponse({ status: 201, description: "Atividade criada com sucesso" })
   create(
-    @Body() createActivityDto: CreateActivityDto,
+    @Body(new ZodValidationPipe(createActivitySchema))
+    createActivityDto: CreateActivityDto,
     @CurrentUser() user: any,
   ) {
     return this.activityService.create(user.id, createActivityDto);
@@ -68,7 +72,8 @@ export class ActivityController {
   @ApiResponse({ status: 404, description: "Atividade não encontrada" })
   update(
     @Param("id") id: string,
-    @Body() updateActivityDto: UpdateActivityDto,
+    @Body(new ZodValidationPipe(updateActivitySchema))
+    updateActivityDto: UpdateActivityDto,
     @CurrentUser() user: any,
   ) {
     return this.activityService.update(id, user.id, updateActivityDto);

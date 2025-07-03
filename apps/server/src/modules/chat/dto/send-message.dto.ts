@@ -1,13 +1,7 @@
-import { IsString, MinLength, MaxLength } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
+import { z } from "zod";
 
-export class SendMessageDto {
-  @ApiProperty({
-    description: "Conteúdo da mensagem",
-    example: "Qual é o melhor exercício para fortalecer o core?",
-  })
-  @IsString()
-  @MinLength(1)
-  @MaxLength(1000)
-  content: string;
-}
+export const sendMessageSchema = z.object({
+  content: z.string().min(1).max(1000),
+});
+
+export type SendMessageDto = z.infer<typeof sendMessageSchema>;

@@ -119,4 +119,33 @@ export class AuthService {
       },
     };
   }
+
+  /**
+   * Gera novo access token realizando rotação de refresh token.
+   * Recebe o token atual (refresh) enviado pelo cliente.
+   */
+  async refresh(oldToken: string) {
+    const decoded = verifyToken(oldToken);
+    if (!decoded) {
+      throw new UnauthorizedException("Token inválido");
+    }
+
+    // Busca sessão existente
+    const session = await this.prisma.session.findUnique({
+      where: { token: oldToken },
+    });
+
+    if (!session || session.expiresAt < new Date()) {
+      throw new UnauthorizedException("Sessão expirada ou não encontrada");
+    }
+
+    // Gera novo token e nova data de expiração
+    const newToken = signToken(session.userId);
+    const newExpires = await createSession(session.userId, newToken);
+
+    // Remove o refresh token antigo (rotação)
+    await this.prisma.session.delete({ where: { token: oldToken } });
+
+    return { token: newToken, expiresAt: newExpires };
+  }
 }

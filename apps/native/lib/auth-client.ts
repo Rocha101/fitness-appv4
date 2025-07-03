@@ -1,6 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 import { queryClient } from "@/utils/query";
 import { useQuery } from "@tanstack/react-query";
+import { useAppStore } from "@/store/app-store";
 
 const TOKEN_KEY = "jwt";
 
@@ -10,11 +11,14 @@ let inMemoryToken: string | null = null;
 const BASE_API = `${process.env.EXPO_PUBLIC_SERVER_URL}/api`;
 
 async function setToken(token: string | null) {
+  const { setToken: updateStore } = useAppStore.getState();
   inMemoryToken = token;
   if (token) {
     await SecureStore.setItemAsync(TOKEN_KEY, token);
+    updateStore(token);
   } else {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
+    updateStore(null);
   }
 }
 
@@ -109,6 +113,7 @@ function useSession() {
         }
 
         const user = await res.json();
+        useAppStore.getState().setUser(user);
 
         return {
           user,
@@ -132,6 +137,7 @@ async function getSession() {
     });
     if (!res.ok) throw new Error();
     const user = await res.json();
+    useAppStore.getState().setUser(user);
     return { user, session: { token } } as any;
   } catch {
     await signOut();
@@ -142,6 +148,7 @@ async function getSession() {
 async function signOut() {
   await setToken(null);
   queryClient.clear();
+  await useAppStore.getState().reset();
 }
 
 // Placeholder stubs for unimplemented features

@@ -21,17 +21,15 @@ import { AiService } from "./ai.service";
 import { ChatService } from "../chat/chat.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { IsArray, ArrayNotEmpty, IsOptional, IsString } from "class-validator";
+import { z } from "zod";
+import { ZodValidationPipe } from "@/lib/zod-validation.pipe";
 
-class ChatRequest {
-  @IsArray()
-  @ArrayNotEmpty()
-  messages: any[];
+const chatRequestSchema = z.object({
+  messages: z.array(z.any()).min(1),
+  id: z.string().optional(),
+});
 
-  @IsOptional()
-  @IsString()
-  id?: string;
-}
+type ChatRequest = z.infer<typeof chatRequestSchema>;
 
 @ApiTags("AI Chat")
 @ApiBearerAuth()
@@ -53,7 +51,7 @@ export class AiController {
   @ApiResponse({ status: 200, description: "Resposta do assistente" })
   @ApiResponse({ status: 400, description: "Dados de entrada inválidos" })
   async chat(
-    @Body() body: ChatRequest,
+    @Body(new ZodValidationPipe(chatRequestSchema)) body: ChatRequest,
     @Headers("X-No-Stream") noStream: string,
     @CurrentUser() user: any,
     @Res() res: Response,

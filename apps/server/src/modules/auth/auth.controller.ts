@@ -21,4 +21,10 @@ export class AuthController {
     const { email, password } = body;
     return this.authService.login(email, password);
   }
+
+  @Post("refresh")
+  @HttpCode(200)
+  async refresh(@Body() body: { token: string }) {
+    return this.authService.refresh(body.token);
+  }
 }

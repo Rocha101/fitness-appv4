@@ -16,6 +16,8 @@ import { UserService } from "./user.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
+import { updateProfileSchema } from "./dto/update-profile.dto";
+import { ZodValidationPipe } from "@/lib/zod-validation.pipe";
 
 @ApiTags("User")
 @ApiBearerAuth()
@@ -35,7 +37,8 @@ export class UserController {
   @ApiOperation({ summary: "Atualizar perfil do usuário" })
   @ApiResponse({ status: 200, description: "Perfil atualizado com sucesso" })
   updateProfile(
-    @Body() updateProfileDto: UpdateProfileDto,
+    @Body(new ZodValidationPipe(updateProfileSchema))
+    updateProfileDto: UpdateProfileDto,
     @CurrentUser() user: any,
   ) {
     return this.userService.updateProfile(user.id, updateProfileDto);

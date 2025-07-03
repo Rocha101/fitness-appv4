@@ -1,5 +1,4 @@
-import { IsString, IsEnum, IsOptional, MinLength } from "class-validator";
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { z } from "zod";
 
 export enum ActivityIntensity {
   BAIXA = "Baixa",
@@ -7,36 +6,11 @@ export enum ActivityIntensity {
   ALTA = "Alta",
 }
 
-export class CreateActivityDto {
-  @ApiProperty({
-    description: "Nome da atividade",
-    example: "Corrida no parque",
-  })
-  @IsString()
-  @MinLength(1)
-  name: string;
+export const createActivitySchema = z.object({
+  name: z.string().min(1),
+  intensity: z.nativeEnum(ActivityIntensity),
+  duration: z.string().min(1),
+  emoji: z.string().optional(),
+});
 
-  @ApiProperty({
-    description: "Intensidade da atividade",
-    enum: ActivityIntensity,
-    example: ActivityIntensity.MEDIA,
-  })
-  @IsEnum(ActivityIntensity)
-  intensity: ActivityIntensity;
-
-  @ApiProperty({
-    description: "Duração da atividade",
-    example: "30 minutos",
-  })
-  @IsString()
-  @MinLength(1)
-  duration: string;
-
-  @ApiPropertyOptional({
-    description: "Emoji representativo da atividade",
-    example: "🏃‍♂️",
-  })
-  @IsOptional()
-  @IsString()
-  emoji?: string;
-}
+export type CreateActivityDto = z.infer<typeof createActivitySchema>;

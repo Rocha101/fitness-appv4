@@ -1,13 +1,7 @@
-import { IsString, MinLength, MaxLength } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
+import { z } from "zod";
 
-export class UpdateChatDto {
-  @ApiProperty({
-    description: "Novo nome do chat",
-    example: "Conversa sobre nutrição",
-  })
-  @IsString()
-  @MinLength(1)
-  @MaxLength(50)
-  name: string;
-}
+export const updateChatSchema = z.object({
+  name: z.string().min(1).max(50),
+});
+
+export type UpdateChatDto = z.infer<typeof updateChatSchema>;

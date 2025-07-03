@@ -21,6 +21,9 @@ import { SendMessageDto } from "./dto/send-message.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { User } from "@prisma/client";
+import { createChatSchema } from "./dto/create-chat.dto";
+import { updateChatSchema } from "./dto/update-chat.dto";
+import { ZodValidationPipe } from "@/lib/zod-validation.pipe";
 
 @ApiTags("Chat")
 @ApiBearerAuth()
@@ -32,7 +35,11 @@ export class ChatController {
   @Post()
   @ApiOperation({ summary: "Criar novo chat" })
   @ApiResponse({ status: 201, description: "Chat criado com sucesso" })
-  create(@Body() createChatDto: CreateChatDto, @CurrentUser() user: any) {
+  create(
+    @Body(new ZodValidationPipe(createChatSchema))
+    createChatDto: CreateChatDto,
+    @CurrentUser() user: any,
+  ) {
     return this.chatService.create(user.id, createChatDto);
   }
 
@@ -64,7 +71,8 @@ export class ChatController {
   @ApiResponse({ status: 404, description: "Chat não encontrado" })
   update(
     @Param("id") id: string,
-    @Body() updateChatDto: UpdateChatDto,
+    @Body(new ZodValidationPipe(updateChatSchema))
+    updateChatDto: UpdateChatDto,
     @CurrentUser() user: any,
   ) {
     return this.chatService.update(id, user.id, updateChatDto);

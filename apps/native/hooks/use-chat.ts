@@ -5,6 +5,7 @@ import * as chatService from "@/services/chat-api";
 import { Chat, Message } from "@/types/chat";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import { useAppStore } from "@/store/app-store";
 
 const CHAT_ID_STORAGE_KEY = "activeChatId";
 
@@ -27,6 +28,7 @@ export function useChat() {
       }
       if (activeChatId) {
         setChatId(activeChatId);
+        useAppStore.getState().setChatId(activeChatId);
       } else {
         createEmptyChatMutation.mutate();
       }
@@ -72,6 +74,7 @@ export function useChat() {
         params: { chatId: newChat.id },
       });
       setChatId(newChat.id);
+      useAppStore.getState().setChatId(newChat.id);
     },
   });
 
@@ -106,6 +109,7 @@ export function useChat() {
         params: { chatId: newChat.id },
       });
       setChatId(newChat.id);
+      useAppStore.getState().setChatId(newChat.id);
     },
   });
 
@@ -157,11 +161,11 @@ export function useChat() {
     chatName,
     messages,
     input,
-    isLoading:
+    initialLoading:
       isChatLoading ||
-      sendMessageMutation.isPending ||
       createChatMutation.isPending ||
       createEmptyChatMutation.isPending,
+    isSending: sendMessageMutation.isPending,
     error:
       chatError ||
       sendMessageMutation.error ||
