@@ -180,21 +180,3 @@ A API NestJS possui Swagger habilitado em `http://localhost:3000/api`.
 | **CI/CD Mobile**           | **EAS Build**                                         | Builds nativos em nuvem integrados ao Expo.                         |
 | **Qualidade**              | ESLint & Prettier + Husky + Commitlint                | Código consistente e commits padronizados.                          |
 | **UI/UX**                  | Huge-icons, micro-interações, otimização Lighthouse   | Experiência moderna e performática.                                 |
-
-## 🛣️ Roadmap (Planejamento)
-
-| Tarefa                                                            | Responsável | Prioridade | Status |
-| ----------------------------------------------------------------- | ----------- | ---------- | ------ |
-| Migrar validação de DTOs para **Zod** (remover `class-validator`) | Backend     | Alta       | ✅     |
-| Implementar **refresh token** e rotação                           | Backend     | Média      | ✅     |
-| Adicionar **Zustand** para estado global (chat/usuário)           | Mobile      | Média      | ✅     |
-| Criar arquivo `eslint.config.mjs` compartilhado                   | Fullstack   | Alta       | ✅     |
-| Integrar **commitlint** + Husky `commit-msg`                      | DevOps      | Alta       | ✅     |
-| Documentar passo-a-passo de **EAS Build** no README               | Mobile      | Média      | ✅     |
-| Otimizar Lighthouse & micro-interações no app (UI pass final)     | Mobile      | Baixa      | ✅     |
-
-Legenda: ✅ concluído · ⏳ em andamento · ❌ pendente
-
----
-
-> Este documento é vivo e será atualizado conforme as tarefas avançarem.
