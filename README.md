@@ -1,3 +1,5 @@
+![mock-fitness-app](https://github.com/user-attachments/assets/ef5fe30f-3bfa-448b-bd0d-645a897311f7)
+
 # Fitness App
 
 Aplicativo mobile completo para registro e acompanhamento de atividades físicas, com backend NestJS, autenticação via JWT e interface de chatbot com IA.
